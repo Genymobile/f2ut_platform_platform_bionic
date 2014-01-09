@@ -85,6 +85,9 @@ libc_common_src_files += \
     bionic/__vsnprintf_chk.cpp \
     bionic/__vsprintf_chk.cpp \
 
+libc_static_common_src_files += \
+    bionic/__set_errno.cpp
+
 libc_bionic_src_files := \
     bionic/abort.cpp \
     bionic/accept.cpp \
@@ -184,7 +187,6 @@ libc_bionic_src_files := \
     bionic/sched_getcpu.cpp \
     bionic/send.cpp \
     bionic/setegid.cpp \
-    bionic/__set_errno.cpp \
     bionic/seteuid.cpp \
     bionic/setpgrp.cpp \
     bionic/sigaction.cpp \
@@ -985,6 +987,32 @@ LOCAL_CLANG := $(use_clang)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(libc_common_additional_dependencies)
 include $(BUILD_STATIC_LIBRARY)
 
+# ========================================================
+# libdsyscalls.so
+# ========================================================
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+	$(libc_arch_static_src_files) \
+	$(libc_static_common_src_files) \
+	bionic/malloc_debug_common.cpp \
+	hybris/libdsyscalls.c
+
+LOCAL_C_INCLUDES := $(libc_common_c_includes)
+LOCAL_CFLAGS := $(libc_common_cflags)
+
+LOCAL_MODULE:= libdsyscalls
+
+LOCAL_SHARED_LIBRARIES := libdl
+LOCAL_WHOLE_STATIC_LIBRARIES := libc_common
+LOCAL_SYSTEM_SHARED_LIBRARIES :=
+
+LOCAL_LDFLAGS := -Wl,--exclude-libs=libgcc.a
+
+LOCAL_MODULE_TAGS := optional
+
+include $(BUILD_SHARED_LIBRARY)
 
 # ========================================================
 # libc.a
@@ -1023,6 +1051,7 @@ LOCAL_CFLAGS := $(libc_common_cflags)
 LOCAL_CONLYFLAGS := $(libc_common_conlyflags)
 LOCAL_CPPFLAGS := $(libc_common_cppflags)
 LOCAL_C_INCLUDES := $(libc_common_c_includes)
+LOCAL_LDFLAGS := -Wl,--no-fatal-warnings
 LOCAL_SRC_FILES := \
     $(libc_arch_dynamic_src_files) \
     $(libc_static_common_src_files) \
@@ -1143,7 +1172,7 @@ LOCAL_MODULE := libc_malloc_debug_qemu
 LOCAL_CLANG := $(use_clang)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(libc_common_additional_dependencies)
 
-LOCAL_SHARED_LIBRARIES := libc libdl
+LOCAL_SHARED_LIBRARIES := libc libdl libdsyscalls
 LOCAL_SYSTEM_SHARED_LIBRARIES :=
 
 # Don't install on release build
