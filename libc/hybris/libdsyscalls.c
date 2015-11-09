@@ -18,9 +18,12 @@
 
 /* Define __set_errno here so it can be hijacked by libhybris
  * at runtime (called from __set_syscall_errno)
- */
+ 
 int __set_errno(int n)
 {
     errno = n;
     return -1;
 }
+*/
+
+
